@@ -1,4 +1,4 @@
-package com.taskflow.infraestructure.adapter.out.persistence.entity;
+package com.taskflow.infrastructure.adapter.out.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

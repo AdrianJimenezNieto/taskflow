@@ -1,4 +1,4 @@
-package com.taskflow.infraestructure.adapter.out.persistence.entity;
+package com.taskflow.infrastructure.adapter.out.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,6 +15,9 @@ public class UserEntity {
 
   @Column(name = "user_name", nullable = false, unique = true) // Cant be null, must be unique
   private String userName;
+
+  @Column(name = "password", nullable = false)
+  private String password;
 
   @Column(name = "name", nullable = false)
   private String name;
