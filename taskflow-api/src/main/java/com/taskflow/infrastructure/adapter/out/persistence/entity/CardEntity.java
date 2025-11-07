@@ -22,6 +22,6 @@ public class CardEntity {
   // Owned by a TaskList
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "task_list_id", nullable = false)
-  private TaskListEntity taskListEntity;
+  private TaskListEntity taskList;
 
 }
