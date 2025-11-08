@@ -25,7 +25,7 @@ public class UserService implements RegisterUserUseCase {
 
     // Verify if the email is already taken
     if (userRepositoryPort.existsByEmail(user.getEmail())) {
-      throw new EmailAlreadyExistsException("El email " + user.getEmail() + "ya está registrado.");
+      throw new EmailAlreadyExistsException("El email " + user.getEmail() + " ya está registrado.");
     }
 
     // Hash the password before saving
