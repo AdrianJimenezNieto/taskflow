@@ -27,7 +27,11 @@ public class SecurityConfig {
       .authorizeHttpRequests(authorizeRequests ->
         authorizeRequests
           // We able api/v1/users/register to be public
-          .requestMatchers("/api/v1/users/register").permitAll()
+          .requestMatchers(
+              "/api/v1/users/register/",
+              "api/v1/users/register",
+              "/error"
+            ).permitAll()
           // Any other request must be authenticated
           .anyRequest().authenticated()
       );

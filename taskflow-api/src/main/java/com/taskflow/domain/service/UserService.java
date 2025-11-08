@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+// Exceptions
+import com.taskflow.domain.exception.EmailAlreadyExistsException;
+
 // User Service implements the in port
 // Here stands the buisness logic for user-related operations
 @Service
@@ -22,8 +25,7 @@ public class UserService implements RegisterUserUseCase {
 
     // Verify if the email is already taken
     if (userRepositoryPort.existsByEmail(user.getEmail())) {
-      // TODO: throw custom exception
-      throw new IllegalArgumentException("El email ya está en uso.");
+      throw new EmailAlreadyExistsException("El email " + user.getEmail() + "ya está registrado.");
     }
 
     // Hash the password before saving
