@@ -4,6 +4,7 @@ import com.taskflow.domain.model.User;
 import com.taskflow.domain.port.in.RegisterUserUseCase;
 import com.taskflow.infrastructure.adapter.in.web.dto.RegisterUserRequest;
 import com.taskflow.infrastructure.adapter.in.web.mapper.UserWebMapper;
+import com.taskflow.infrastructure.adapter.in.web.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class UserController {
 
   @PostMapping("/register") // Endpoint for user registration
   // Valid activates validation on the incoming request body
-  public ResponseEntity<User> register(@Valid @RequestBody RegisterUserRequest request) {
+  public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
 
     // Map DTO to domain model
     User userToRegister = userWebMapper.toDomain(request);
@@ -30,7 +31,10 @@ public class UserController {
     // Call the use case to register the user
     User registeredUser = registerUserUseCase.registerUser(userToRegister);
 
+    // Map the User domain to DTO safe response
+    UserResponse response = userWebMapper.toResponse(registeredUser);
+
     // Return the response (201 Created)
-    return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 }

@@ -19,7 +19,6 @@ public class UserPersistenceAdapter implements UserRepositoryPort {
   private final UserPersistenceMapper userMapper;
 
   // Implements methods from UserRepositoryPort
-  
   @Override
   public User save(User user) {
     // Translate Domain Model to Entity

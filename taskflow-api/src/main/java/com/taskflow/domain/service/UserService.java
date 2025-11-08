@@ -5,6 +5,7 @@ import com.taskflow.domain.port.in.RegisterUserUseCase;
 import com.taskflow.domain.port.out.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 // User Service implements the in port
 // Here stands the buisness logic for user-related operations
@@ -14,6 +15,7 @@ public class UserService implements RegisterUserUseCase {
   
   // We depend on the out port (UserRepositoryPort), not the interface
   private final UserRepositoryPort userRepositoryPort;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public User registerUser(User user) {
@@ -24,8 +26,11 @@ public class UserService implements RegisterUserUseCase {
       throw new IllegalArgumentException("El email ya está en uso.");
     }
 
-    // TODO: Password hashing logic should be here
-    // For now, we will save it as plain text (not recommended for production)
+    // Hash the password before saving
+    String hashedPassword = passwordEncoder.encode(user.getPassword());
+
+    // Set the hashed password to the user object
+    user.setPassword(hashedPassword);
 
     // Persist the user using the out port
     return userRepositoryPort.save(user);
