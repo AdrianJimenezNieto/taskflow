@@ -46,6 +46,27 @@ public class JwtTokenProvider {
     return Keys.hmacShaKeyFor(keyBytes);
   }
 
-  // TODO: Add the validation methods here
+  // Method to extract the "Subject" from the token
+  public String getEmailFromToken(String token) {
+    return Jwts.parserBuilder()
+            .setSigningKey(getSigningKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .getSubject();
+  }
   
+  // Method to validate the token
+  public boolean validateToken(String token) {
+    try {
+      Jwts.parserBuilder()
+          .setSigningKey(getSigningKey())
+          .build()
+          .parseClaimsJws(token);
+      return true;
+    } catch (Exception e) {
+      // TODO: log the error
+      return false;
+    }
+  }
 }
