@@ -3,7 +3,7 @@ package com.taskflow.domain.port.in;
 // Simple DTO to pass the data of the login
 import lombok.Getter;
 
-public interface LoginUserCase {
+public interface LoginUserUseCase {
 
   String login(LoginCommand command);
 

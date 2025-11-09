@@ -1,11 +1,17 @@
 package com.taskflow.domain.service;
 
 import com.taskflow.domain.model.User;
+import com.taskflow.domain.port.in.LoginUserUseCase;
 import com.taskflow.domain.port.in.RegisterUserUseCase;
 import com.taskflow.domain.port.out.UserRepositoryPort;
+import com.taskflow.infrastructure.adapter.out.security.jwt.JwtTokenProvider; // Provider
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.AuthenticationManager; // Manager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 // Exceptions
 import com.taskflow.domain.exception.EmailAlreadyExistsException;
@@ -14,11 +20,15 @@ import com.taskflow.domain.exception.EmailAlreadyExistsException;
 // Here stands the buisness logic for user-related operations
 @Service
 @RequiredArgsConstructor
-public class UserService implements RegisterUserUseCase {
+public class UserService implements RegisterUserUseCase, LoginUserUseCase {
   
   // We depend on the out port (UserRepositoryPort), not the interface
   private final UserRepositoryPort userRepositoryPort;
   private final PasswordEncoder passwordEncoder;
+
+  // Beans for JWT
+  private final AuthenticationManager authenticationManager;
+  private final JwtTokenProvider tokenProvider;
 
   @Override
   public User registerUser(User user) {
@@ -36,5 +46,23 @@ public class UserService implements RegisterUserUseCase {
 
     // Persist the user using the out port
     return userRepositoryPort.save(user);
+  }
+
+  // Method for the jwt authentication
+  @Override
+  public String login(LoginCommand command) {
+    // Create an authentication try
+    Authentication authentication = authenticationManager.authenticate(
+      new UsernamePasswordAuthenticationToken(
+        command.getEmail(),
+        command.getPassword()
+      )
+    );
+
+    // If the manager doesnt throw exception the authentication is succesful
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    // Generate and return the token
+    return tokenProvider.generateToken(authentication);
   }
 }

@@ -1,4 +1,4 @@
-package com.taskflow.infrastructure.adapter.out.security.jwt.service;
+package com.taskflow.infrastructure.adapter.out.security.service;
 
 import com.taskflow.domain.port.out.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     // We search the user on our Database using the port
     com.taskflow.domain.model.User ourUser = userRepositoryPort.findByEmail(email)
       .orElseThrow(() ->
-        new UsernameNotFoundException("Usuario no encontrado con el email: " + email);
+        new UsernameNotFoundException("Usuario no encontrado con el email: " + email)
       );
 
     // Conver our User (domain) into User Spring Security
@@ -32,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     return new User(
       ourUser.getEmail(),
       ourUser.getPassword(),
-      Collection.emptyList() // Roles here ("ROLE_USER")
+      Collections.emptyList() // Roles here ("ROLE_USER")
     );
 
   }

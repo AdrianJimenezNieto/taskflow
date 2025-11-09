@@ -19,7 +19,7 @@ public class JwtTokenProvider {
   @Value("${jwt.secret-key}")
   private String secretKeyString;
 
-  @Value("{$jwt.expiration}")
+  @Value("${jwt.expiration}")
   private long jwtExpiration;
 
   // Method to generate the token
