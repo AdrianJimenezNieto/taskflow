@@ -1,6 +1,5 @@
 package com.taskflow.infrastructure.adapter.in.web;
 
-import com.taskflow.infrastructure.adapter.out.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
