@@ -1,6 +1,7 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage.tsx';
 import DashboardPage from './pages/DashboardPage.tsx';
+import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
 
 function App() {
   return(
@@ -10,12 +11,13 @@ function App() {
         {/* Public route */}
         <Route path='/login' element={<LoginPage />} />
 
-        {/* Private Route */}
-        <Route path='/dashboard' element={<DashboardPage />} />
+        {/* Protected Route */}
+        <Route element={<ProtectedRoute />}>
+          <Route path='/dashboard' element={<DashboardPage />} />
+        </Route>
 
-        {/* TODO: Add register route
-        TODO: Add root route "/" to redirect
-        TODO: Add protected Routes */}
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </div>
   )
