@@ -1,14 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage.tsx';
+import DashboardPage from './pages/DashboardPage.tsx';
+import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
 
 function App() {
-  return (
-    <div className='flex h-screen w-full items-center justify-center bg-gray-900'>
-      <h1 className='text-3xl font-bold text-white'>
-        TaskFlow Client
-      </h1>
+  return(
+    // Dark background for all the app
+    <div className='min-h-screen w-full bg-gray-900 p-4'>
+      <Routes>
+        {/* Public route */}
+        <Route path='/login' element={<LoginPage />} />
+
+        {/* Protected Route */}
+        <Route element={<ProtectedRoute />}>
+          <Route path='/dashboard' element={<DashboardPage />} />
+        </Route>
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
     </div>
   )
 }
