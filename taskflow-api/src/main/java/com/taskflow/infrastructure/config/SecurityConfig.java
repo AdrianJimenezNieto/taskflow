@@ -1,13 +1,10 @@
 package com.taskflow.infrastructure.config;
 
-import com.taskflow.infrastructure.adapter.out.security.service.CustomUserDetailsService;
 import com.taskflow.infrastructure.adapter.in.web.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,24 +26,12 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  // Inyect the UserDetailsService
-  private final CustomUserDetailsService customUserDetailsService;
   private final JwtAuthenticationFilter jwtAuthenticationFilter; // Filter Inyection
   
   @Bean // Defines a bean for password encoding
   public PasswordEncoder passwordEncoder() {
     // Uses BCrypt algorithm for hashing passwords
     return new BCryptPasswordEncoder();
-  }
-
-  @Bean // Provider that tells Spring how authenticate
-  public AuthenticationProvider authenticationProvider () {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    // Tells who is the user manager
-    authProvider.setUserDetailsService(customUserDetailsService);
-    // Tells what to encrypt
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
   }
 
   @Bean
@@ -91,7 +76,6 @@ public class SecurityConfig {
           // Any other request must be authenticated
           .anyRequest().authenticated()
       )
-      .authenticationProvider(authenticationProvider())
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     
     return http.build();
