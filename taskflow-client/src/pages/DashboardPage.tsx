@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useBoardStore } from "../store/boardStore";
 import { getMyBoards, createBoard } from "../services/boardService";
-import type { Board } from "../models";
 
 export default function DashboardPage() {
 
