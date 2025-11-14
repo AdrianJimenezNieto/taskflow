@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 
@@ -27,6 +28,9 @@ import java.util.Arrays;
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter; // Filter Inyection
+
+  @Value("${frontend.url}")
+  private String frontendUrl;
   
   @Bean // Defines a bean for password encoding
   public PasswordEncoder passwordEncoder() {
@@ -44,7 +48,10 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+    configuration.setAllowedOrigins(Arrays.asList(
+      "http://localhost:5173",
+      frontendUrl
+      ));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
