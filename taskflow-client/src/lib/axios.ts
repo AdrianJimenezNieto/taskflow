@@ -1,10 +1,13 @@
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
 
+// Vite env variable
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+
 // Create the axios instance
 export const api = axios.create({
   // We define the base URL of our SpringBoot API
-  baseURL: 'http://localhost:8080/api/v1'
+  baseURL: apiBaseUrl
 });
 
 // Axios Interceptor
