@@ -19,8 +19,9 @@ services:
   # ========================
   # Frontend Service (React)
   # ========================
-  - type: static_site # Static site
+  - type: web # Static site
     name: taskflow-client
+    runtime: static # Static site
     
     # Path to the root of the project
     rootDir: ./taskflow-client 
