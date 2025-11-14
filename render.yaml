@@ -1,0 +1,39 @@
+services:
+  # ========================
+  #  Backend Service (API)
+  # ========================
+  - type: web # Web Service
+    name: taskflow-api
+    env: docker # Docker use
+    
+    # Dockerfile path, relative to the project
+    dockerfilePath: ./taskflow-api/Dockerfile 
+    
+    healthCheckPath: /error 
+    
+    # Spring runs in this port
+    envVars:
+      - key: PORT
+        value: 8080 # Same as in EXPOSE in Dockerfile
+
+  # ========================
+  # Frontend Service (React)
+  # ========================
+  - type: static_site # Static site
+    name: taskflow-client
+    
+    # Path to the root of the project
+    rootDir: ./taskflow-client 
+    
+    # Command to build the React project
+    buildCommand: npm install && npm run build
+    
+    # dist is the folder that Vite throws the files
+    publishDir: dist 
+    
+    # Writing Rule for Render
+    # (All the requests go to index.html)
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
