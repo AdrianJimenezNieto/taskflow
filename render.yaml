@@ -30,7 +30,7 @@ services:
     buildCommand: npm install && npm run build
     
     # dist is the folder that Vite throws the files
-    publishDir: dist 
+    staticPublishPath: dist 
     
     # Writing Rule for Render
     # (All the requests go to index.html)
