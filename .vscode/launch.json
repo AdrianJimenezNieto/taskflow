@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch TaskFlow API (dev)",
+      "request": "launch",
+      "mainClass": "com.taskflow.TaskflowApplication",
+      "projectName": "taskflow-api",
+      "args": "--spring.profiles.active=dev"
+    }
+  ]
+}
