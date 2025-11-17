@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getBoardDetails } from "../services/boardService";
+import { getBoardDetails, createTaskList } from "../services/boardService";
 import type { BoardDetails, TaskList, Card } from "../models";
 
 export default function BoardDetailPage() {
@@ -11,6 +11,7 @@ export default function BoardDetailPage() {
   const [board, setBoard] = useState<BoardDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [newListTitle, setNewListTitle] = useState('');
 
   // useEffect hook: runs when the component is mounted
   useEffect(() => {
@@ -37,6 +38,30 @@ export default function BoardDetailPage() {
 
     fetchBoard();
   }, [boardId]); // It reruns if the URL changes
+
+  // New List handler
+  const handleCreateList = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (newListTitle.trim() === '' || !boardId) return;
+
+    try {
+      // Call the API
+      const newList = await createTaskList(boardId, newListTitle);
+
+      // Update the local state
+      if (board) {
+        setBoard({
+          ...board,
+          lists: [...board.lists, newList]
+        });
+      }
+
+      // Clean the input
+      setNewListTitle('');
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+    }
+  };
 
   // Condicional rendering logic
   if (isLoading) {
@@ -83,7 +108,25 @@ export default function BoardDetailPage() {
         ) : (
           <p className="text-sm text-gray-400">Este tablero aún no tiene listas.</p>
         )}
-        {/* TODO: Form to add new card (US-202)*/}
+
+        {/* Form to add new list (US-202) */}
+        <div className="w-72 flex-shrink-0">
+          <form onSubmit={handleCreateList} className="rounded-lg bg-gray-800 p-4">
+            <input
+              type="text"
+              value={newListTitle}
+              onChange={(e) => setNewListTitle(e.target.value)}
+              placeholder="Añadir nueva lista..."
+              className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="mt-2 w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition duration-200 ease-in-out hover:bg-blue-700"
+            >
+              Crear Lista
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
