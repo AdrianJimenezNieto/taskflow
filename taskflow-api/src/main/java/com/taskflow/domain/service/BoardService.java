@@ -7,6 +7,7 @@ import com.taskflow.domain.model.TaskList;
 import com.taskflow.domain.port.in.CreateBoardUseCase;
 import com.taskflow.domain.port.in.GetBoardDetailsUseCase;
 import com.taskflow.domain.port.in.GetBoardsByOwnerUseCase;
+import com.taskflow.domain.port.in.CreateTaskListUseCase;
 import com.taskflow.domain.port.out.BoardRepositoryPort;
 import com.taskflow.domain.port.out.CardRepositoryPort;
 import com.taskflow.domain.port.out.TaskListRepositoryPort;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase, GetBoardDetailsUseCase {
+public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase, GetBoardDetailsUseCase, CreateTaskListUseCase {
   
   private final BoardRepositoryPort boardRepositoryPort;
   private final UserRepositoryPort userRepositoryPort;
@@ -77,5 +78,30 @@ public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase
 
     // Return the board
     return board;
+  }
+
+  @Override
+  public TaskList createTaskList(CreateTaskListCommand command, String ownerUsername) {
+    // Find the user (sec check)
+    User user = userRepositoryPort.findByEmail(ownerUsername)
+      .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
+
+    // Find the board that belongs to
+    Board board = boardRepositoryPort.findById(command.getBoardId())
+      .orElseThrow(() -> new EntityNotFoundException("Tablero no encontrado"));
+
+    // SECURITY CHECK
+    if (!board.getUserId().equals(user.getId())) {
+      throw new AccessDeniedException("No tienes permiso para añadir listas a este tablero");
+    }
+
+    // Create the domain object
+    TaskList newTaskList = TaskList.builder()
+      .title(command.getTitle())
+      .boardId(command.getBoardId())
+      .build();
+
+    // Return using the persistence port
+    return taskListRepositoryPort.save(newTaskList);
   }
 }

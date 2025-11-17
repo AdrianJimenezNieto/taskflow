@@ -4,7 +4,9 @@ import com.taskflow.domain.model.Board;
 import com.taskflow.domain.model.TaskList;
 import com.taskflow.domain.model.Card;
 import com.taskflow.domain.port.in.CreateBoardUseCase;
+import com.taskflow.domain.port.in.CreateTaskListUseCase;
 import com.taskflow.infrastructure.adapter.in.web.dto.CreateBoardRequest;
+import com.taskflow.infrastructure.adapter.in.web.dto.CreateTaskListRequest;
 import com.taskflow.infrastructure.adapter.in.web.dto.BoardResponse;
 import com.taskflow.infrastructure.adapter.in.web.dto.BoardDetailResponse;
 import com.taskflow.infrastructure.adapter.in.web.dto.CardResponse;
@@ -50,7 +52,7 @@ public class BoardWebMapper {
   }
 
   // From domain to DTO TaskList
-  private TaskListResponse toTaskListResponse(TaskList list) {
+  public TaskListResponse toTaskListResponse(TaskList list) {
     return TaskListResponse.builder()
       .id(list.getId())
       .title(list.getTitle())
@@ -69,5 +71,10 @@ public class BoardWebMapper {
       .title(card.getTitle())
       .description(card.getDescription())
       .build();
+  }
+
+  // From request to command
+  public CreateTaskListUseCase.CreateTaskListCommand toCommand(CreateTaskListRequest request, Long boardId) {
+    return new CreateTaskListUseCase.CreateTaskListCommand(request.getTitle(), boardId);
   }
 }
