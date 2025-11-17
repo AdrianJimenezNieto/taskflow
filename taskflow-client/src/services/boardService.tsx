@@ -1,5 +1,5 @@
 import api from '../lib/axios';
-import type { Board } from '../models';
+import type { Board, BoardDetails } from '../models';
 
 // US-106: Bring all of my boards
 export const getMyBoards = async (): Promise<Board[]> => {
@@ -20,5 +20,17 @@ export const createBoard = async (title: string): Promise<Board> => {
   } catch (error) {
     console.log("Error creating board: ", error);
     throw new Error("Fallo al crear el tablero.")
+  }
+}
+
+// US-201: Get Board details
+export const getBoardDetails = async (boardId: string): Promise<BoardDetails> => {
+  try {
+    // Call the endpoint
+    const response = await api.get<BoardDetails>(`/boards/${boardId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching board details: ', error);
+    throw new Error('No se pudo cargar el tablero')
   }
 }
