@@ -2,6 +2,7 @@ package com.taskflow.domain.port.out;
 
 import com.taskflow.domain.model.Board;
 import java.util.List;
+import java.util.Optional;
 
 public interface BoardRepositoryPort {
   
@@ -10,6 +11,8 @@ public interface BoardRepositoryPort {
 
   // Find all tasklists
   List<Board> findAllByUserId(Long userId);
+
+  Optional<Board> findById(Long boardId);
 
   // TODO: rest of the crud
 }

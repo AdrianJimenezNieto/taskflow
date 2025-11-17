@@ -1,7 +1,6 @@
 package com.taskflow.infrastructure.adapter.out.persistence;
 
 import com.taskflow.domain.model.Card;
-import com.taskflow.domain.model.TaskList;
 import com.taskflow.domain.port.out.CardRepositoryPort;
 import com.taskflow.infrastructure.adapter.out.persistence.entity.CardEntity;
 import com.taskflow.infrastructure.adapter.out.persistence.entity.TaskListEntity;

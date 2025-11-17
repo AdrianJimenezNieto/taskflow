@@ -2,21 +2,29 @@ package com.taskflow.domain.service;
 
 import com.taskflow.domain.model.Board;
 import com.taskflow.domain.model.User;
+import com.taskflow.domain.model.Card;
+import com.taskflow.domain.model.TaskList;
 import com.taskflow.domain.port.in.CreateBoardUseCase;
+import com.taskflow.domain.port.in.GetBoardDetailsUseCase;
 import com.taskflow.domain.port.in.GetBoardsByOwnerUseCase;
 import com.taskflow.domain.port.out.BoardRepositoryPort;
+import com.taskflow.domain.port.out.CardRepositoryPort;
+import com.taskflow.domain.port.out.TaskListRepositoryPort;
 import com.taskflow.domain.port.out.UserRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase {
+public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase, GetBoardDetailsUseCase {
   
   private final BoardRepositoryPort boardRepositoryPort;
   private final UserRepositoryPort userRepositoryPort;
+  private final TaskListRepositoryPort taskListRepositoryPort;
+  private final CardRepositoryPort cardRepositoryPort;
 
   @Override
   public Board createBoard(CreateBoardCommand command, String ownerUsername) {
@@ -39,5 +47,35 @@ public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase
                                     .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado."));
     // Ask for all of tasklists for that userId
     return boardRepositoryPort.findAllByUserId(owner.getId());
+  }
+
+  @Override
+  public Board getBoardDetails(Long boardId, String username) {
+    // Find the user with the port (security check)
+    User user = userRepositoryPort.findByEmail(username)
+      .orElseThrow(() -> new EntityNotFoundException());
+    // Find the board
+    Board board = boardRepositoryPort.findById(boardId)
+      .orElseThrow(() -> new EntityNotFoundException());
+
+    // SECURITY CHECK be sure that the board is owned by the user
+    if(!board.getUserId().equals(user.getId())) {
+      throw new AccessDeniedException("No tienes permiso para ver este tablero");
+    }
+
+    // Load the lists of that board
+    List<TaskList> lists = taskListRepositoryPort.findAllByBoard(boardId);
+
+    // Load the cards for each taskList
+    for (TaskList list : lists) {
+      List<Card> cards = cardRepositoryPort.findAllByTaskListId(list.getId());
+      list.setCards(cards);
+    }
+
+    // Assign the lists to the board
+    board.setLists(lists);
+
+    // Return the board
+    return board;
   }
 }

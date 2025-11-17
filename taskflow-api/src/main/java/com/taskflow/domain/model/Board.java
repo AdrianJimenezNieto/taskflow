@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data // Generates getters, setters, toString, equals, hashCode
 @Builder // Implements the builder pattern
@@ -14,4 +15,5 @@ public class Board {
   private String title;
   // reference to the owner user
   private Long userId;
+  private List<TaskList> lists;
 }
