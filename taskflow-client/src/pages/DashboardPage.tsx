@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useBoardStore } from "../store/boardStore";
 import { getMyBoards, createBoard } from "../services/boardService";
+import { Link } from "react-router-dom";
 
 export default function DashboardPage() {
 
@@ -86,13 +87,14 @@ export default function DashboardPage() {
         {
           boards.length > 0 ?(
             boards.map((board) => (
-              <div
-                key={board.id}
-                className="rounded-lg bg-gray-800 p-4 shadow.lg transition duration-200 hover:scale-105 hover:cursor-pointer"
-              >
-                <h3 className="font-bold">{board.title}</h3>
-                {/* TODO: make this a link to /board/{board.id} */}
-              </div>
+              <Link key={board.id} to={`/board/${board.id}`}>
+                <div
+                  className="rounded-lg bg-gray-800 p-4 shadow.lg transition duration-200 hover:scale-105 hover:cursor-pointer"
+                >
+                  <h3 className="font-bold">{board.title}</h3>
+                  {/* TODO: make this a link to /board/{board.id} */}
+                </div>
+              </Link>
             ))
           ) : (
             <p className="text-gray-400">No tienes tableros. ¡Crea uno!</p>

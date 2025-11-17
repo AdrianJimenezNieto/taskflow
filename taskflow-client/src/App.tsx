@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage.tsx';
 import DashboardPage from './pages/DashboardPage.tsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
+import BoardDetailPage from './pages/BoardDetailPage.tsx';
 
 function App() {
   return(
@@ -13,7 +14,10 @@ function App() {
 
         {/* Protected Route */}
         <Route element={<ProtectedRoute />}>
+          {/* Dashboard */}
           <Route path='/dashboard' element={<DashboardPage />} />
+          {/* Board Detail */}
+          <Route path='/board/:boardId' element={<BoardDetailPage />} />
         </Route>
 
         {/* Default redirect */}
