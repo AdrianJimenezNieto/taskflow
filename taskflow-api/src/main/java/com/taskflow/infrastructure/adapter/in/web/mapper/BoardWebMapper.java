@@ -5,12 +5,14 @@ import com.taskflow.domain.model.TaskList;
 import com.taskflow.domain.model.Card;
 import com.taskflow.domain.port.in.CreateBoardUseCase;
 import com.taskflow.domain.port.in.CreateTaskListUseCase;
+import com.taskflow.domain.port.in.CreateCardUseCase;
 import com.taskflow.infrastructure.adapter.in.web.dto.CreateBoardRequest;
 import com.taskflow.infrastructure.adapter.in.web.dto.CreateTaskListRequest;
 import com.taskflow.infrastructure.adapter.in.web.dto.BoardResponse;
 import com.taskflow.infrastructure.adapter.in.web.dto.BoardDetailResponse;
 import com.taskflow.infrastructure.adapter.in.web.dto.CardResponse;
 import com.taskflow.infrastructure.adapter.in.web.dto.TaskListResponse;
+import com.taskflow.infrastructure.adapter.in.web.dto.CreateCardRequest;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,7 +67,7 @@ public class BoardWebMapper {
   }
 
   // From domain to DTO CardResponse
-  private CardResponse toCardResponse(Card card) {
+  public CardResponse toCardResponse(Card card) {
     return CardResponse.builder()
       .id(card.getId())
       .title(card.getTitle())
@@ -73,8 +75,13 @@ public class BoardWebMapper {
       .build();
   }
 
-  // From request to command
+  // From request to command (CREATE TASKLIST)
   public CreateTaskListUseCase.CreateTaskListCommand toCommand(CreateTaskListRequest request, Long boardId) {
     return new CreateTaskListUseCase.CreateTaskListCommand(request.getTitle(), boardId);
+  }
+
+  // From request to command (CREATE CARD)
+  public CreateCardUseCase.CreateCardCommand toCommand(CreateCardRequest request, Long taskListId){
+    return new CreateCardUseCase.CreateCardCommand(request.getTitle(), taskListId);
   }
 }

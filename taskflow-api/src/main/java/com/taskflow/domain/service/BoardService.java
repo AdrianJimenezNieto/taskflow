@@ -8,6 +8,7 @@ import com.taskflow.domain.port.in.CreateBoardUseCase;
 import com.taskflow.domain.port.in.GetBoardDetailsUseCase;
 import com.taskflow.domain.port.in.GetBoardsByOwnerUseCase;
 import com.taskflow.domain.port.in.CreateTaskListUseCase;
+import com.taskflow.domain.port.in.CreateCardUseCase;
 import com.taskflow.domain.port.out.BoardRepositoryPort;
 import com.taskflow.domain.port.out.CardRepositoryPort;
 import com.taskflow.domain.port.out.TaskListRepositoryPort;
@@ -20,7 +21,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase, GetBoardDetailsUseCase, CreateTaskListUseCase {
+public class BoardService implements 
+  CreateBoardUseCase, GetBoardsByOwnerUseCase,
+  GetBoardDetailsUseCase, CreateTaskListUseCase,
+  CreateCardUseCase {
   
   private final BoardRepositoryPort boardRepositoryPort;
   private final UserRepositoryPort userRepositoryPort;
@@ -103,5 +107,32 @@ public class BoardService implements CreateBoardUseCase, GetBoardsByOwnerUseCase
 
     // Return using the persistence port
     return taskListRepositoryPort.save(newTaskList);
+  }
+
+  @Override
+  public Card createCard(CreateCardCommand command, String ownerUsername) {
+    // Find the user
+    User user = userRepositoryPort.findByEmail(ownerUsername)
+      .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
+    // Find the tasklist that belongs to
+    TaskList list = taskListRepositoryPort.findById(command.getTaskListId())
+      .orElseThrow(() -> new EntityNotFoundException("La lista no encontrada"));
+    // Find the board (to verify the owner)
+    Board board = boardRepositoryPort.findById(list.getBoardId())
+      .orElseThrow(() -> new EntityNotFoundException("Tablero no encontrado"));
+
+    // SECURITY CHECK
+    if (!board.getUserId().equals(user.getId())) {
+      throw new AccessDeniedException("No tienes permiso para crear esta tarjeta.");
+    }
+
+    // Create the domain object
+    Card newCard = Card.builder()
+      .title(command.getTitle())
+      .taskListId(command.getTaskListId())
+      .build();
+
+    // Persist with the repository port
+    return cardRepositoryPort.save(newCard);
   }
 }

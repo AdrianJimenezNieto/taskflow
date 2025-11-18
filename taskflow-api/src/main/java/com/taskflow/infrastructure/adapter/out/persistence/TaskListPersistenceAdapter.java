@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -43,5 +44,11 @@ public class TaskListPersistenceAdapter implements TaskListRepositoryPort {
     TaskListEntity savedEntity = taskListJpaRepository.save(taskListEntity);
     // Remap and return
     return taskListMapper.toDomain(savedEntity);
+  }
+
+  @Override
+  public Optional<TaskList> findById(Long taskListId){
+    return taskListJpaRepository.findById(taskListId)
+      .map(taskListMapper::toDomain);
   }
 }
