@@ -7,7 +7,7 @@ import BoardDetailPage from './pages/BoardDetailPage.tsx';
 function App() {
   return(
     // Dark background for all the app
-    <div className='min-h-screen w-full bg-gray-900 p-4'>
+    <div className='min-h-screen w-full bg-gray-900'>
       <Routes>
         {/* Public route */}
         <Route path='/login' element={<LoginPage />} />

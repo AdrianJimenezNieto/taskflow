@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getBoardDetails, createTaskList } from "../services/boardService";
 import type { BoardDetails, TaskList, Card } from "../models";
+import TaskColumn from "../components/board/TaskColumn";
 
 export default function BoardDetailPage() {
   // Get the param from the URL
@@ -63,6 +64,22 @@ export default function BoardDetailPage() {
     }
   };
 
+  // Function to handle the columns
+  const handleCardAdded = (listId: number, newCard: Card) => {
+    if(!board) return;
+
+    // Update the inmutable state
+    const updateLists = board.lists.map((list) => {
+      if (list.id === listId) {
+        // If it is the correct list, add the list
+        return {...list, cards:[...list.cards, newCard]}
+      }
+      return list;
+    });
+
+    setBoard({ ...board, lists: updateLists})
+  };
+
   // Condicional rendering logic
   if (isLoading) {
     // TODO: build a loader
@@ -79,31 +96,19 @@ export default function BoardDetailPage() {
 
   // Board render
   return(
-    <div className="text-white">
-      <h1 className="mb-4 text-3xl font-bold"> {board.title} </h1>
+    <div className="text-white h-screen flex flex-col p-4">
+      <h1 className="mb-4 text-3xl font-bold"> {board?.title} </h1>
 
       {/* Horizontal container for the lists */}
-      <div className="flex h-full gap-4 overflow-x-auto">
+      <div className="flex h-full gap-4 overflow-x-auto overflow-y-hidden pb-4">
         {/* Map the lists */}
         {board.lists.length > 0 ? (
           board.lists.map((list: TaskList) => (
-            <div key={list.id} className="w-72 flex-shrink-0 rounded-lg bg-gray-800 p-4">
-              <h2 className="mb-3 font-semibold">{list.title}</h2>
-
-              {/* Vertical container for the cards */}
-              <div className="flex flex-col gap-3">
-                {list.cards.length > 0 ? (
-                  list.cards.map((card: Card) => (
-                    <div key={card.id} className="rounded-md bg-gray-700 p-3 shadow-md">
-                      {card.title}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-400">No hay tarjetas en esta lista.</p>
-                )}
-                {/* TODO: Add form to add new card (US-203) */}
-              </div>
-            </div>
+            <TaskColumn
+              key={list.id}
+              list={list}
+              onCardAdded={handleCardAdded}
+            />
           ))
         ) : (
           <p className="text-sm text-gray-400">Este tablero aún no tiene listas.</p>
