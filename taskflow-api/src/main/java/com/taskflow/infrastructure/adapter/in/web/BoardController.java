@@ -1,10 +1,16 @@
 package com.taskflow.infrastructure.adapter.in.web;
 
 import com.taskflow.domain.model.Board;
+import com.taskflow.domain.model.TaskList;
 import com.taskflow.domain.port.in.CreateBoardUseCase;
+import com.taskflow.domain.port.in.CreateTaskListUseCase;
 import com.taskflow.domain.port.in.GetBoardsByOwnerUseCase;
+import com.taskflow.domain.port.in.GetBoardDetailsUseCase;
 import com.taskflow.infrastructure.adapter.in.web.dto.BoardResponse;
 import com.taskflow.infrastructure.adapter.in.web.dto.CreateBoardRequest;
+import com.taskflow.infrastructure.adapter.in.web.dto.BoardDetailResponse;
+import com.taskflow.infrastructure.adapter.in.web.dto.CreateTaskListRequest;
+import com.taskflow.infrastructure.adapter.in.web.dto.TaskListResponse;
 import com.taskflow.infrastructure.adapter.in.web.mapper.BoardWebMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +29,8 @@ public class BoardController {
   // Inyect the dependencies
   private final CreateBoardUseCase createBoardUseCase;
   private final GetBoardsByOwnerUseCase getBoardsByOwnerUseCase;
+  private final GetBoardDetailsUseCase getBoardDetailsUseCase;
+  private final CreateTaskListUseCase createTaskListUseCase;
   private final BoardWebMapper boardWebMapper;
 
   // US-105: Create a board
@@ -51,5 +59,34 @@ public class BoardController {
     List<Board> boards = getBoardsByOwnerUseCase.getBoards(ownerUsername);
     // Map the list into DTO response and return it
     return ResponseEntity.ok(boardWebMapper.toResponseList(boards));
+  }
+
+  // US-201: Details of a board
+  @GetMapping("/{boardId}")
+  public ResponseEntity<BoardDetailResponse> getBoardDetails(
+    @PathVariable Long boardId, // <-- Capture the Id from the URL 
+    @AuthenticationPrincipal UserDetails userDetails // <-- user of the token
+  ) {
+    // Call the use case with the id and the email (username)
+    Board board = getBoardDetailsUseCase.getBoardDetails(boardId, userDetails.getUsername());
+    // Map the result into DTO response
+    return ResponseEntity.ok(boardWebMapper.toDetailResponse(board));
+  }
+
+  // US-202: Create a new TaskList
+  @PostMapping("/{boardId}/lists")
+  public ResponseEntity<TaskListResponse> createList(
+    @PathVariable Long boardId,
+    @Valid @RequestBody CreateTaskListRequest request,
+    @AuthenticationPrincipal UserDetails userDetails
+  ){
+    // Map the DTO into command
+    CreateTaskListUseCase.CreateTaskListCommand command = boardWebMapper.toCommand(request, boardId);
+
+    // Call the use case (includes sec check)
+    TaskList newTaskList = createTaskListUseCase.createTaskList(command, userDetails.getUsername());
+
+    // Map the domain result into response DTO 
+    return new ResponseEntity<>(boardWebMapper.toTaskListResponse(newTaskList), HttpStatus.CREATED);
   }
 }

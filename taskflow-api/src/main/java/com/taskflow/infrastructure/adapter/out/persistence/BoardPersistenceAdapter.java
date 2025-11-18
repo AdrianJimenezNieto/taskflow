@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,5 +41,12 @@ public class BoardPersistenceAdapter implements BoardRepositoryPort {
     return entities.stream()
                   .map(boardMapper::toDomain)
                   .collect(Collectors.toList());
+  }
+
+  @Override
+  public Optional<Board> findById(Long boardId) {
+    // Search with JPA and use the mapper to convert
+    return boardJpaRepository.findById(boardId)
+      .map(boardMapper::toDomain);
   }
 }
