@@ -9,10 +9,13 @@ import com.taskflow.domain.port.in.GetBoardDetailsUseCase;
 import com.taskflow.domain.port.in.GetBoardsByOwnerUseCase;
 import com.taskflow.domain.port.in.CreateTaskListUseCase;
 import com.taskflow.domain.port.in.CreateCardUseCase;
+import com.taskflow.domain.port.in.ReorderCardUseCase;
 import com.taskflow.domain.port.out.BoardRepositoryPort;
 import com.taskflow.domain.port.out.CardRepositoryPort;
 import com.taskflow.domain.port.out.TaskListRepositoryPort;
 import com.taskflow.domain.port.out.UserRepositoryPort;
+import com.taskflow.infrastructure.adapter.in.web.dto.ReorderCardRequest;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,7 +27,7 @@ import java.util.List;
 public class BoardService implements 
   CreateBoardUseCase, GetBoardsByOwnerUseCase,
   GetBoardDetailsUseCase, CreateTaskListUseCase,
-  CreateCardUseCase {
+  CreateCardUseCase, ReorderCardUseCase {
   
   private final BoardRepositoryPort boardRepositoryPort;
   private final UserRepositoryPort userRepositoryPort;
@@ -134,5 +137,12 @@ public class BoardService implements
 
     // Persist with the repository port
     return cardRepositoryPort.save(newCard);
+  }
+
+  @Override
+  public void reorderCards(List<ReorderCardRequest> updates, String ownerUsername) {
+    // Find user
+    User user = userRepositoryPort.findByEmail(ownerUsername)
+      .orElseThrow(() -> new EntityNotFoundException());
   }
 }

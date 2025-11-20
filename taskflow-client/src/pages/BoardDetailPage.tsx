@@ -14,7 +14,6 @@ import {
   closestCorners,
 } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
-import { arrayMove } from '@dnd-kit/sortable';
 import SortableCard from '../components/board/SortableCard';
 // ----------------------
 
@@ -129,7 +128,7 @@ export default function BoardDetailPage() {
     })
   }
 
-  const handleDragEnd = () => {}
+  const handleDragEnd = (event: DragEndEvent) => {}
 
   // Al soltar (la lógica de reordenamiento interno)
   // const handleDragEnd = (event: DragEndEvent) => {
