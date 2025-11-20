@@ -8,13 +8,12 @@ import TaskColumn from "../components/board/TaskColumn";
 import {
   DndContext,
   DragOverlay,
-  closestCenter, // Use closestCenter for most simple collision
   PointerSensor,
   useSensor,
   useSensors,
   closestCorners,
 } from '@dnd-kit/core';
-import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
+import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { arrayMove } from '@dnd-kit/sortable';
 import SortableCard from '../components/board/SortableCard';
 // ----------------------
@@ -29,6 +28,22 @@ export default function BoardDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newListTitle, setNewListTitle] = useState('');
+
+  // Filter to change board state
+  const cleanBoardState = (board: BoardDetails): BoardDetails => {
+    // Defensive check for null or undefined board/lists
+    if (!board || !board.lists) {
+      return board;
+    }
+
+    return {
+      ...board,
+      lists: board.lists.map(list => ({
+        ...list,
+        cards: (list.cards || []).filter(c => c),
+      }))
+    }
+  }
 
   // DND-KIT CONFIG ----
   const [activeCard, setActiveCard] = useState<Card | null>(null);
@@ -64,49 +79,145 @@ export default function BoardDetailPage() {
     if (card) setActiveCard(card);
   }
 
-  const handleDragOver = () => {}
-
-  // Al soltar (la lógica de reordenamiento interno)
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    setActiveCard(null); // Limpiar el overlay
-
     if (!over || !board) return;
 
     const activeId = Number(active.id);
-    const overId = Number(over.id);
+    const overId = Number(over.id)
 
+    // Container detection
     const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);    
+    const overContainer = findContainer(overId);
 
-    if (!activeContainer || !overContainer) return;
-
-    // 1. Reordenar solo si estamos en la misma lista
-    if (activeContainer.id === overContainer.id) {
-      // Usamos los arrays limpios para la indexación
-      const activeItems = (activeContainer.cards || []).filter(c => c);
-
-      const activeIndex = activeItems.findIndex((i) => i.id === activeId);
-      const overIndex = activeItems.findIndex((i) => i.id === overId); // Usamos activeItems porque es el mismo contenedor
-
-      if (activeIndex !== overIndex) {
-        setBoard((prev) => {
-          if (!prev) return null;
-
-          const newLists = prev.lists.map((l) => {
-            if (l.id === activeContainer.id) {
-              // arrayMove maneja la reordenación inmutable del array
-              return { ...l, cards: arrayMove(activeItems, activeIndex, overIndex) };
-            }
-            return l;
-          });
-          return { ...prev, lists: newLists };
-        });
-        // TODO: Llamada a la API para persistir el orden (Fase 2)
-      }
+    if (!activeContainer || !overContainer || activeContainer.id === overContainer.id) {
+      return;
     }
-    // Ignoramos el movimiento entre listas por ahora.
-  };
+
+    setBoard((prev) => {
+      if(!prev) return null;
+
+      // Obtain the clean arrays
+      const activeItems = (activeContainer.cards || []).filter(c => c);
+      const overItems = (overContainer.cards || []).filter(c => c);
+
+      // Index
+      const overIndex = overItems.findIndex((i) => i.id === overId);
+
+      let newIndex;
+      if (overItems.some(c  => c.id === overId)) {
+        newIndex = overIndex >= 0 ? overIndex + (active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height ? 1 : 0) : overItems.length;
+      } else {
+        newIndex = overItems.length;
+      }
+
+      const newState = {
+        ...prev,
+        lists: prev.lists.map((l) => {
+          if (l.id === activeContainer.id) {
+            return { ...l, cards: activeItems.filter((item) => item.id !== activeId)}
+          }
+          if (l.id === overContainer.id) {
+            const newCards = [...overItems];
+            newCards.splice(newIndex, 0, activeCard as Card);
+            return { ...l, cards: newCards };
+          }
+          return l;
+        }),
+      };
+      return cleanBoardState(newState);
+    })
+  }
+
+  const handleDragEnd = () => {}
+
+  // Al soltar (la lógica de reordenamiento interno)
+  // const handleDragEnd = (event: DragEndEvent) => {
+    // const { active, over } = event;
+    // setActiveCard(null); // Limpiar el overlay
+
+    // if (!over || !board) return;
+
+    // const activeId = Number(active.id);
+    // const overId = Number(over.id);
+
+    // const activeContainer = findContainer(activeId);
+    // const overContainer = findContainer(overId);    
+
+    // if (!activeContainer || !overContainer) {
+    //   setActiveCard(null);
+    //   return;
+    // };
+
+    // // Obtain the clean arrays
+    // const activeItems = (activeContainer.cards || []).filter(c => c);
+    // const overItems = (overContainer.cards || []).filter(c => c);
+
+    // // Reorder on the same list
+    // if (activeContainer.id === overContainer.id) {
+      
+    //   const activeIndex = activeItems.findIndex((i) => i.id === activeId);
+    //   const overIndex = overItems.findIndex((i) => i.id === overId);
+
+    //   if (activeIndex !== overIndex) {
+    //     setBoard((prev) => {
+    //       if (!prev) return null;
+
+    //       const newLists = prev.lists.map((l) => {
+    //         if (l.id === activeContainer.id) {
+    //           // arrayMove handle the reorder of the items on the list
+    //           return { ...l, cards: arrayMove(activeItems, activeIndex, overIndex) };
+    //         }
+    //         return l;
+    //       });
+    //       return { ...prev, lists: newLists };
+    //     });
+    //     // TODO: Llamada a la API para persistir el orden (Fase 2)
+    //   }
+    // } else {
+    //   // Index of the list of the active card (old list)
+    //   const activeIndex = activeItems.findIndex((i) => i.id === activeId);
+
+    //   // If the card isnt on the array of the origin list (should not happen)
+    //   if (activeIndex === -1) {
+    //     setActiveCard(null);
+    //     return;
+    //   }
+
+    //   // Determinate the position of intersection: over a card (obtain index), if not to the end
+    //   const overIndex = overItems.findIndex((i) => i.id === over.id);
+    //   const newIndex = overIndex !== -1 ? overIndex : overItems.length;
+
+    //   setBoard((prev) => {
+    //     if (!prev) return null;
+
+    //     const newState = {
+    //       ...prev,
+    //       lists: prev.lists.map((l) => {
+    //         if (l.id === activeContainer.id) {
+    //           // Delete of the old list
+    //           return { ...l, cards: activeItems.filter((item) => item.id !== activeId)}
+    //         }
+    //         if (l.id === overContainer.id) {
+    //           // Insert it on the new list (using activeCard directly)
+    //           const newCardState = { ...activeCard, taskListId: overContainer.id};
+
+    //           const newCards = [...overItems];
+    //           newCards.splice(newIndex, 0, newCardState as Card);
+
+    //           return { ...l, cards: newCards };
+    //         }
+    //         return l;
+    //       }),
+    //     };
+
+    //     return cleanBoardState(newState);
+    //   });
+    //   // TODO: CALL THE API
+    // }
+
+  //   setActiveCard(null); // clean the state
+  // };
   
   // -------------------
 
@@ -195,7 +306,7 @@ export default function BoardDetailPage() {
   return(
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
